@@ -4,27 +4,33 @@ import java.util.Arrays;
 public class SeamCarver {
     private static final double BORDER_PIXEL_ENERGY = 1000d;
     private static final boolean VERTICAL = true, HORIZONTAL = false;
-    private Picture pic;
+    private Picture picture;
 
+    // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
         if (picture == null){
             throw new IllegalArgumentException();
         }
-        this.pic = new Picture(picture);
+
+        this.picture = new Picture(picture);
     }
 
+    // current picture
     public Picture picture() {
-        return new Picture(this.pic);
+        return picture;
     }
 
+    // width of current picture
     public int width() {
-        return pic.width();
+        return picture.width();
     }
 
+    // height of current picture
     public int height() {
-        return pic.height();
+        return picture.height();
     }
-    
+
+    // energy of pixel at column x and row y
     public double energy(int col, int row) {
         validatePixel(col, row);
 
@@ -32,30 +38,35 @@ public class SeamCarver {
             return BORDER_PIXEL_ENERGY;
         }
 
-        double rx = pic.get(col + 1, row).getRed() - pic.get(col - 1, row).getRed();
-        double gx = pic.get(col + 1, row).getGreen() - pic.get(col - 1, row).getGreen();
-        double bx = pic.get(col + 1, row).getBlue() - pic.get(col - 1, row).getBlue();
-        double ry = pic.get(col, row + 1).getRed() - pic.get(col, row - 1).getRed();
-        double gy = pic.get(col, row + 1).getGreen() - pic.get(col, row - 1).getGreen();
-        double by = pic.get(col, row + 1).getBlue() - pic.get(col, row - 1).getBlue();
+        double rx = picture.get(col + 1, row).getRed() - picture.get(col - 1, row).getRed();
+        double gx = picture.get(col + 1, row).getGreen() - picture.get(col - 1, row).getGreen();
+        double bx = picture.get(col + 1, row).getBlue() - picture.get(col - 1, row).getBlue();
+        double ry = picture.get(col, row + 1).getRed() - picture.get(col, row - 1).getRed();
+        double gy = picture.get(col, row + 1).getGreen() - picture.get(col, row - 1).getGreen();
+        double by = picture.get(col, row + 1).getBlue() - picture.get(col, row - 1).getBlue();
 
         return Math.sqrt(rx * rx + gx * gx + bx * bx + ry * ry + gy * gy + by * by);
     }
 
+    // sequence of indices for horizontal seam
     public int[] findHorizontalSeam() {
         Pair[][] energies = new Pair[height()][width()];
+
         for (int i = 0; i < height(); i++){
             energies[i][0] = new Pair(BORDER_PIXEL_ENERGY, -1);
         }
+
         for (int col = 1; col < width(); col++) {
             energies[0][col] = new Pair(BORDER_PIXEL_ENERGY, -1);
             for (int row = 0; row < height(); row++) {
                 relaxHorizontal(energies, row, col);
             }
         }
+
         return extractHorizontalSeam(energies);
     }
 
+    // sequence of indices for vertical seam
     public int[] findVerticalSeam() {
         Pair[][] energies = new Pair[height()][width()];
         for (int i = 0; i < width(); i++){
@@ -68,10 +79,12 @@ public class SeamCarver {
                 relaxVertical(energies, row, col);
             }
         }
+
         return extractVerticalSeam(energies);
     }
 
 
+    // remove horizontal seam from current picture
     public void removeHorizontalSeam(int[] seam) {
         if (!isValidSeam(seam, HORIZONTAL)) {
             throw new IllegalArgumentException("Illegal seam!");
@@ -84,16 +97,18 @@ public class SeamCarver {
                 if (seam[col] == row){
                     rowBias = 1;
                 }
-                seamedPicture.set(col, row, pic.get(col, row + rowBias));
+                seamedPicture.set(col, row, picture.get(col, row + rowBias));
             }
         }
-        this.pic = seamedPicture;
+        this.picture = seamedPicture;
     }
 
+    // remove vertical seam from current picture
     public void removeVerticalSeam(int[] seam) {
         if (!isValidSeam(seam, VERTICAL)){
             throw new IllegalArgumentException("Illegal seam!");
         }
+
         Picture seamedPicture = new Picture(width() - 1, height());
         for(int row = 0; row < height(); row++){
             int colBias = 0;
@@ -101,10 +116,10 @@ public class SeamCarver {
                 if (seam[row] == col){
                     colBias = 1;
                 }
-                seamedPicture.set(col, row, pic.get(col + colBias, row));
+                seamedPicture.set(col, row, picture.get(col + colBias, row));
             }
         }
-        this.pic = seamedPicture;
+        picture = seamedPicture;
     }
 
     private void validatePixel(int col, int row) {
@@ -114,7 +129,7 @@ public class SeamCarver {
     }
 
     private boolean isValidPixel(int col, int row) {
-        return col > -1 && col < width() && row > -1 && row < height();
+        return col >= 0 && col < width() && row >= 0 && row < height();
     }
 
     private void relaxVertical(Pair[][] energies, int row, int col) {
@@ -124,6 +139,7 @@ public class SeamCarver {
                 new Pair( isValidPixel(col, row - 1) ? myEnergy + energies[row - 1][col].energy : Double.MAX_VALUE, col),
                 new Pair( isValidPixel(col + 1, row - 1) ? myEnergy + energies[row - 1][col + 1].energy : Double.MAX_VALUE, col + 1)
         };
+
         Arrays.sort(paths);
         energies[row][col] = paths[0];
     }
@@ -144,6 +160,7 @@ public class SeamCarver {
         int[] seam = new int[height()];
         double lowestEnergy = Double.MAX_VALUE;
         int index = -1;
+
         // Find the lowest energy
         for (int col = 0; col < width(); col++) {
             if (energies[height() - 1][col].energy < lowestEnergy) {
@@ -165,6 +182,7 @@ public class SeamCarver {
         int[] seam = new int[width()];
         double lowestEnergy = Double.MAX_VALUE;
         int index = -1;
+
         // Find the lowest energy
         for (int row = 0; row < height(); row++){
             if (energies[row][width() - 1].energy < lowestEnergy) {
@@ -179,6 +197,7 @@ public class SeamCarver {
             index = energies[index][col].prev;
             col--;
         }
+
         return seam;
     }
 
@@ -206,7 +225,7 @@ public class SeamCarver {
     }
 
 
-    private static class Pair implements Comparable<Pair>{
+    private static class Pair implements Comparable<Pair> {
         public final double energy;
         public final int prev;
 
@@ -214,14 +233,10 @@ public class SeamCarver {
             this.energy = energy;
             this.prev = prev;
         }
+
         @Override
         public int compareTo(Pair o) {
-            if (this.energy > o.energy) {
-                return 1;
-            } else if (this.energy < o.energy) {
-                return -1;
-            }
-            return 0;
+            return Double.compare(this.energy, o.energy);
         }
     }
 
