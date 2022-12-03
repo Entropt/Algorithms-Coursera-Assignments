@@ -240,4 +240,16 @@ public class SeamCarver {
         }
     }
 
+    public static void main(String[] args) {
+        SeamCarver pic = new SeamCarver(new Picture("Pic.jpg"));
+
+        int deleted = 300;
+        while (deleted > 0) {
+            deleted--;
+            pic.removeVerticalSeam(pic.findVerticalSeam());
+        }
+
+        pic.picture.show();
+    }
+
 }

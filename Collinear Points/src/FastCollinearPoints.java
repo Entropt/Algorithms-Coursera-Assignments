@@ -14,8 +14,8 @@ public class FastCollinearPoints {
             throw new IllegalArgumentException("Input is null.");
         }
 
-        for (int i = 0; i < points.length; i++) {
-            if (points[i] == null) {
+        for (Point point : points) {
+            if (point == null) {
                 throw new IllegalArgumentException("Input contains null.");
             }
         }

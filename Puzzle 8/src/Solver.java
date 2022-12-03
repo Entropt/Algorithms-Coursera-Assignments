@@ -9,7 +9,9 @@ public class Solver {
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
-        if (initial == null) throw new NullPointerException();
+        if (initial == null) {
+            throw new NullPointerException();
+        }
 
         isSolvable = false;
         solutionBoards = new Stack<>();
@@ -18,11 +20,15 @@ public class Solver {
         searchNodes.insert(new SearchNode(initial,null));
         searchNodes.insert(new SearchNode(initial.twin(),null));
 
-        while (!searchNodes.min().board.isGoal()) {
+        while (!searchNodes.isEmpty() && !searchNodes.min().board.isGoal()) {
             SearchNode searchNode = searchNodes.delMin();
             for (Board board : searchNode.board.neighbors())
                 if (searchNode.prevNode == null || !searchNode.prevNode.board.equals(board))
                     searchNodes.insert(new SearchNode(board, searchNode));
+        }
+
+        if (searchNodes.isEmpty()) {
+            return;
         }
 
         SearchNode current = searchNodes.min();
@@ -30,9 +36,12 @@ public class Solver {
             solutionBoards.push(current.board);
             current = current.prevNode;
         }
+
         solutionBoards.push(current.board);
 
-        if (current.board.equals(initial)) isSolvable = true;
+        if (current.board.equals(initial)) {
+            isSolvable = true;
+        }
     }
 
     // is the initial board solvable? (see below)

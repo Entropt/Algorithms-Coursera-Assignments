@@ -1,8 +1,8 @@
 import java.util.ArrayList;
-import java.util.Queue;
+import java.util.Arrays;
 
 public class Board {
-    private final int[][] tiles;
+    private int[][] tiles;
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
@@ -78,7 +78,7 @@ public class Board {
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
                 if (tiles[i][j] == 0) {
-                    return i * tiles.length + j + 1;
+                    return i * tiles.length + j;
                 }
             }
         }
@@ -90,57 +90,65 @@ public class Board {
         ArrayList<Board> neighbors = new ArrayList<>();
 
         // Location of space.
-        int x = (Space() - 1) / tiles.length;
-        int y = (Space() - 1) % tiles.length;
-
-        Board newNeighbor = new Board(this.tiles);
+        int x = Space() / tiles.length;
+        int y = Space() % tiles.length;
+        //System.out.println(x + " " + y);
 
         if (x > 0) {
-            neighbors.add(new Board(tileSwap(tiles, x, y, x - 1, y)));
+            neighbors.add(new Board(tileSwap(x, y, x - 1, y)));
         }
 
-        newNeighbor = new Board(this.tiles);
         if (x < tiles.length - 1) {
-            neighbors.add(new Board(tileSwap(tiles, x, y, x + 1, y)));
+            neighbors.add(new Board(tileSwap(x, y, x + 1, y)));
         }
 
-        newNeighbor = new Board(this.tiles);
         if (y > 0) {
-            neighbors.add(new Board(tileSwap(tiles, x, y, x, y - 1)));
+            neighbors.add(new Board(tileSwap(x, y, x, y - 1)));
         }
 
-        newNeighbor = new Board(this.tiles);
         if (y < tiles.length - 1) {
-            neighbors.add(new Board(tileSwap(tiles, x, y, x, y + 1)));
+            neighbors.add(new Board(tileSwap(x, y, x, y + 1)));
         }
 
         return neighbors;
     }
 
-    private int[][] tileSwap(int[][] tiles, int row1, int col1, int row2, int col2) {
-        int mid = tiles[row1][col1];
-        tiles[row1][col1] = tiles[row2][col2];
-        tiles[row2][col2] = mid;
+    private int[][] tileSwap(int row1, int col1, int row2, int col2) {
+        int[][] newTiles = new int[tiles.length][tiles.length];
+        for (int i = 0; i < tiles.length; i++)
+            for (int j = 0; j < tiles.length; j++)
+                newTiles[i][j] = tiles[i][j];
 
-        return tiles;
+        int mid = newTiles[row1][col1];
+        newTiles[row1][col1] = newTiles[row2][col2];
+        newTiles[row2][col2] = mid;
+
+        return newTiles;
     }
 
     // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
         if (tiles[0][0] == 0 || tiles[0][1] == 0) {
-            return new Board(tileSwap(tiles, 0, 0, 0, 1));
+            return new Board(tileSwap(1, 0, 1, 1));
         }
-        return new Board(tileSwap(tiles, 1, 0, 1, 1));
+
+        return new Board(tileSwap(0, 0, 0, 1));;
     }
 
     // unit testing (not graded)
-        public static void main(String[] args) {
-            Board board = new Board(new int[][]{{1, 2, 3}, {4, 0, 6}, {7, 8, 5}});
-            System.out.println(board.toString());
-            for (Board board1 :
-                    board.neighbors()) {
-                System.out.println(board1);
-            }
+    public static void main(String[] args) {
+        Board board = new Board(new int[][]{{1, 2, 3},
+                                            {4, 0, 6},
+                                            {7, 8, 5}});
 
+        ArrayList<Board> bo = (ArrayList<Board>) board.neighbors();
+
+
+        System.out.println(board.Space());
+        System.out.println(board.toString());
+        for (Board board1 : bo) {
+            System.out.println(board1.toString());
         }
+        System.out.println(board.toString());
+    }
 }

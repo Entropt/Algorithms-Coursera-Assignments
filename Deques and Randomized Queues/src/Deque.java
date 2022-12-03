@@ -140,7 +140,5 @@ public class Deque<Item> implements Iterable<Item> {
             System.out.println(iter.next());
         }
     }
-
-
 }
 
